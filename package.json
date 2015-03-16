@@ -1,10 +1,25 @@
 {
   "name": "wav-decoder",
   "description": "isomorphic wav data decoder",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "bugs": {
     "url": "https://github.com/mohayonao/wav-decoder/issues"
+  },
+  "dependencies": {
+    "audiodata": "*",
+    "inline-worker": "^0.1.0"
+  },
+  "devDependencies": {
+    "babel": "^4.7.12",
+    "browserify": "^9.0.3",
+    "espower-babel": "^1.4.0",
+    "isparta": "^2.2.0",
+    "jshint": "^2.6.3",
+    "jshint-stylish": "^1.0.1",
+    "mocha": "^2.2.1",
+    "power-assert": "^0.10.2",
+    "uglify-js": "^2.4.17"
   },
   "files": [
     "package.json",
@@ -13,7 +28,7 @@
   ],
   "homepage": "https://github.com/mohayonao/wav-decoder/",
   "keywords": [
-    "encode",
+    "decode",
     "isomorphic",
     "wav"
   ],
@@ -22,5 +37,15 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/mohayonao/wav-decoder.git"
+  },
+  "scripts": {
+    "build": "npm run build-to5 && npm run build-browser && npm run build-minify",
+    "build-browser": "browserify ./lib/index.js --standalone WavDecoder --outfile build/wav-decoder.js",
+    "build-minify": "uglifyjs build/wav-decoder.js -m -r self -o build/wav-decoder.min.js",
+    "build-to5": "babel src --out-dir lib",
+    "cover": "babel-node node_modules/.bin/isparta cover --report text --report html --report lcov node_modules/.bin/_mocha",
+    "lint": "jshint src test --reporter node_modules/jshint-stylish/stylish.js",
+    "test": "mocha --require espower-babel/guess",
+    "travis": "npm run lint && npm run test"
   }
 }
