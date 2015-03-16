@@ -1,7 +1,7 @@
 {
   "name": "wav-decoder",
   "description": "isomorphic wav data decoder",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "bugs": {
     "url": "https://github.com/mohayonao/wav-decoder/issues"
