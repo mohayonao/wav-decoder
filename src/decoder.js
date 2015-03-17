@@ -39,6 +39,10 @@ export default class Decoder {
         return reject(new Error(e.data.message));
       };
 
+      if (!(buffer instanceof ArrayBuffer)) {
+        buffer = new Uint8Array(buffer).buffer;
+      }
+
       worker.postMessage({
         type: "decode",
         buffer: buffer
