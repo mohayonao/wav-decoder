@@ -1,1 +1,3 @@
-module.exports = require("./decoder");
+import Decoder from "./decoder";
+
+export default Decoder;

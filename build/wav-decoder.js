@@ -32,8 +32,8 @@ function decoder() {
   };
 
   var formats = {
-    1: "lpcm"
-  };
+    1: "lpcm",
+    3: "lpcm" };
 
   self.decode = function (buffer) {
     return new Promise(function (resolve) {
@@ -81,6 +81,7 @@ function decoder() {
 
     var format = {
       formatId: formatId,
+      floatingPoint: formatId === 3,
       numberOfChannels: reader.readUint16(),
       sampleRate: reader.readUint32(),
       byteRate: reader.readUint32(),
@@ -160,14 +161,71 @@ function decoder() {
 
   BufferReader.prototype.readPCM = function (channelData, length, format) {
     var numberOfChannels = format.numberOfChannels;
-    var x = 0;
-    for (var i = 0; i < length; i++) {
-      for (var ch = 0; ch < numberOfChannels; ch++) {
-        x = this.readInt16() / 32768;
-        channelData[ch][i] = x;
+    var uint8 = new Uint8Array(this.view.buffer, this.pos);
+    var viewLength = length * numberOfChannels;
+    var bytes = format.bitsPerSample >> 3;
+    var byteOffset = Math.ceil(uint8.byteOffset / bytes) * bytes;
+    var view,
+        dx = 1;
+
+    if (format.floatingPoint) {
+      switch (format.bitsPerSample) {
+        case 32:
+          view = new Float32Array(uint8.buffer, byteOffset, viewLength);
+          break;
+        case 64:
+          view = new Float64Array(uint8.buffer, byteOffset, viewLength);
+          break;
+      }
+    } else {
+      switch (format.bitsPerSample) {
+        case 8:
+          view = new Int8Array(uint8.buffer, byteOffset, viewLength);
+          dx = 128;
+          break;
+        case 16:
+          view = new Int16Array(uint8.buffer, byteOffset, viewLength);
+          dx = 32768;
+          break;
+        case 24:
+          view = convert24to32(uint8, uint8.byteOffset, viewLength * 3);
+          dx = 8388608;
+          break;
+        case 32:
+          view = new Int32Array(uint8.buffer, byteOffset, viewLength);
+          dx = 2147483648;
+          break;
       }
     }
+
+    if (!view) {
+      throw new Error("not suppoerted bit depth " + format.bitsPerSample);
+    }
+
+    for (var i = 0; i < length; i++) {
+      for (var ch = 0; ch < numberOfChannels; ch++) {
+        channelData[ch][i] = view[i * numberOfChannels + ch] / dx;
+      }
+    }
+
+    this.pos += length;
   };
+
+  function convert24to32(int8, byteOffset, viewLength) {
+    var uint8 = new Uint8Array(int8.buffer, byteOffset, viewLength);
+    var int32 = new Int32Array(uint8.length / 3);
+
+    for (var i = 0, imax = int32.length; i < imax; i++) {
+      var x0 = uint8[i * 3 + 0];
+      var x1 = uint8[i * 3 + 1];
+      var x2 = uint8[i * 3 + 2];
+      var xx = x0 + (x1 << 8) + (x2 << 16);
+
+      int32[i] = xx & 8388608 ? xx - 16777216 : xx;
+    }
+
+    return int32;
+  }
 }
 
 decoder.self = decoder.util = self;
@@ -184,8 +242,6 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 var InlineWorker = _interopRequire(require("inline-worker"));
 
-var AudioData = _interopRequire(require("audiodata"));
-
 var decoder = _interopRequire(require("./decoder-worker"));
 
 var Decoder = (function () {
@@ -201,15 +257,9 @@ var Decoder = (function () {
 
           worker.onmessage = function (e) {
             if (e.data.type === "decoded") {
-              var _e$data$audioData = e.data.audioData;
-              var numberOfChannels = _e$data$audioData.numberOfChannels;
-              var _length = _e$data$audioData.length;
-              var sampleRate = _e$data$audioData.sampleRate;
-              var buffers = _e$data$audioData.buffers;
+              var audioData = e.data.audioData;
 
-              var audioData = new AudioData(numberOfChannels, _length, sampleRate);
-
-              audioData.channelData = buffers.map(function (buffer) {
+              audioData.channelData = audioData.buffers.map(function (buffer) {
                 return new Float32Array(buffer);
               });
 
@@ -218,31 +268,15 @@ var Decoder = (function () {
             return reject(new Error(e.data.message));
           };
 
+          if (buffer && typeof buffer.length === "number") {
+            buffer = new Uint8Array(buffer).buffer;
+          }
+
           worker.postMessage({
             type: "decode",
             buffer: buffer
           }, [buffer]);
         });
-      }
-    }
-  }, {
-    canProcess: {
-      value: function canProcess(buffer) {
-        var view = new DataView(buffer);
-
-        var readString = function (length, offset) {
-          var data = "";
-          for (var i = 0; i < length; i++) {
-            data += String.fromCharCode(view.getUint8(i + offset));
-          }
-          return data;
-        };
-
-        try {
-          return readString(4, 0) === "RIFF" && readString(4, 8) === "WAVE";
-        } catch (e) {}
-
-        return false;
       }
     }
   });
@@ -251,137 +285,19 @@ var Decoder = (function () {
 })();
 
 module.exports = Decoder;
-},{"./decoder-worker":1,"audiodata":5,"inline-worker":6}],3:[function(require,module,exports){
+},{"./decoder-worker":1,"inline-worker":4}],3:[function(require,module,exports){
 "use strict";
 
-module.exports = require("./decoder");
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var Decoder = _interopRequire(require("./decoder"));
+
+module.exports = Decoder;
 },{"./decoder":2}],4:[function(require,module,exports){
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var installed = { decoder: [], encoder: [] };
-
-var AudioData = (function () {
-  function AudioData(numberOfChannels, length, sampleRate) {
-    _classCallCheck(this, AudioData);
-
-    this.numberOfChannels = numberOfChannels;
-    this.length = length;
-    this.duration = length / sampleRate;
-    this.sampleRate = sampleRate;
-    this.channelData = new Array(numberOfChannels);
-
-    for (var ch = 0; ch < numberOfChannels; ch++) {
-      this.channelData[ch] = new Float32Array(length);
-    }
-  }
-
-  _createClass(AudioData, {
-    getChannelData: {
-      value: function getChannelData(ch) {
-        return this.channelData[ch];
-      }
-    },
-    toTransferable: {
-      value: function toTransferable() {
-        var _ref = this;
-
-        var numberOfChannels = _ref.numberOfChannels;
-        var length = _ref.length;
-        var sampleRate = _ref.sampleRate;
-
-        var buffers = this.channelData.map(function (data) {
-          return data.buffer;
-        });
-
-        return { numberOfChannels: numberOfChannels, length: length, sampleRate: sampleRate, buffers: buffers };
-      }
-    }
-  }, {
-    install: {
-      value: function install(klass) {
-        if (typeof klass === "function") {
-          if (klass.prototype.decode && typeof klass.canProcess === "function") {
-            installed.decoder.push(klass);
-          }
-          if (klass.prototype.encode && typeof klass.canProcess === "function") {
-            installed.encoder.push(klass);
-          }
-        }
-        return AudioData;
-      }
-    },
-    decode: {
-      value: function decode(buffer) {
-        if (buffer && typeof buffer.length === "number") {
-          buffer = new Uint8Array(buffer).buffer;
-        }
-        if (!(buffer instanceof ArrayBuffer)) {
-          return Promise.reject(new TypeError("invalid ArrayBuffer for decoding"));
-        }
-
-        return new Promise(function (resolve, reject) {
-          var decoders = installed.decoder.filter(function (decoder) {
-            return decoder.canProcess(buffer);
-          });
-
-          var decode = function () {
-            var Decoder = decoders.shift();
-
-            if (!Decoder) {
-              return reject(new Error("failed to decode"));
-            }
-
-            new Decoder().decode(buffer).then(resolve, decode);
-          };
-
-          decode();
-        });
-      }
-    },
-    encode: {
-      value: function encode(audioData, format) {
-        if (!(audioData instanceof AudioData)) {
-          return Promise.reject(new TypeError("invalid ArrayData for encoding"));
-        }
-
-        return new Promise(function (resolve, reject) {
-          var encoders = installed.encoder.filter(function (encoder) {
-            return encoder.canProcess(format);
-          });
-
-          var encode = function () {
-            var Encoder = encoders.shift();
-
-            if (!Encoder) {
-              return reject(new Error("failed to encode"));
-            }
-
-            new Encoder().encode(audioData, format).then(resolve, encode);
-          };
-
-          encode();
-        });
-      }
-    }
-  });
-
-  return AudioData;
-})();
-
-module.exports = AudioData;
-},{}],5:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./audio-data");
-},{"./audio-data":4}],6:[function(require,module,exports){
-"use strict";
-
 module.exports = require("./inline-worker");
-},{"./inline-worker":7}],7:[function(require,module,exports){
+},{"./inline-worker":5}],5:[function(require,module,exports){
 (function (global){
 "use strict";
 

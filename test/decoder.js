@@ -28,7 +28,6 @@ describe("Decoder", () => {
       let decoder = new Decoder();
 
       return decoder.decode(wavFile).then((audioData) => {
-        assert(audioData instanceof AudioData);
         assert(audioData.sampleRate === 44100);
         assert(audioData.numberOfChannels === 2);
         assert(audioData.length === 2);
