@@ -4,11 +4,12 @@ import InlineWorker from "inline-worker";
 import decoder from "./decoder-worker";
 
 export default class Decoder {
-  decode(buffer) {
-    return new Promise((resolve, reject) => {
-      let worker = new InlineWorker(decoder, decoder.self);
+  constructor() {
+    this._worker = new InlineWorker(decoder, decoder.self);
+    this._worker.onmessage = (e) => {
+      let callback = this._callbacks[e.data.callbackId];
 
-      worker.onmessage = (e) => {
+      if (callback) {
         if (e.data.type === "decoded") {
           let audioData = e.data.audioData;
 
@@ -16,18 +17,29 @@ export default class Decoder {
             return new Float32Array(buffer);
           });
 
-          return resolve(audioData);
+          callback.resolve(audioData);
+        } else {
+          callback.reject(new Error(e.data.message));
         }
-        return reject(new Error(e.data.message));
-      };
+      }
+
+      this._callbacks[e.data.callbackId] = null;
+    };
+    this._callbacks = [];
+  }
+
+  decode(buffer) {
+    return new Promise((resolve, reject) => {
+      let callbackId = this._callbacks.length;
+
+      this._callbacks.push({ resolve, reject });
 
       if (buffer && typeof buffer.length === "number") {
         buffer = new Uint8Array(buffer).buffer;
       }
 
-      worker.postMessage({
-        type: "decode",
-        buffer: buffer
+      this._worker.postMessage({
+        type: "decode", buffer, callbackId
       }, [ buffer ]);
     });
   }

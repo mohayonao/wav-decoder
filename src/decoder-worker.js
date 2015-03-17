@@ -15,15 +15,19 @@ function decoder() {
     switch (e.data.type) {
       case "decode":
         self.decode(e.data.buffer).then(function(audioData) {
-          self.postMessage({
+          var data = {
             type: "decoded",
+            callbackId: e.data.callbackId,
             audioData: audioData
-          }, [ audioData.buffers ]);
-        }).catch(function(err) {
-          self.postMessage({
+          };
+          self.postMessage(data, [ audioData.buffers ]);
+        }, function(err) {
+          var data = {
             type: "error",
+            callbackId: e.data.callbackId,
             message: err.message
-          });
+          };
+          self.postMessage(data);
         });
         break;
     }
