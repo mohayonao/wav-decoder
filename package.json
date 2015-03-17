@@ -1,13 +1,12 @@
 {
   "name": "wav-decoder",
   "description": "isomorphic wav data decoder",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "bugs": {
     "url": "https://github.com/mohayonao/wav-decoder/issues"
   },
   "dependencies": {
-    "audiodata": "*",
     "inline-worker": "^0.1.0"
   },
   "devDependencies": {
@@ -34,6 +33,9 @@
   ],
   "licenses": "MIT",
   "main": "./lib/index.js",
+  "peerDependencies": {
+    "audiodata": "*"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/mohayonao/wav-decoder.git"
