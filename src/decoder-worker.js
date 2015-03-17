@@ -15,15 +15,19 @@ function decoder() {
     switch (e.data.type) {
       case "decode":
         self.decode(e.data.buffer).then(function(audioData) {
-          self.postMessage({
+          var data = {
             type: "decoded",
+            callbackId: e.data.callbackId,
             audioData: audioData
-          }, [ audioData.buffers ]);
-        }).catch(function(err) {
-          self.postMessage({
+          };
+          self.postMessage(data, [ audioData.buffers ]);
+        }, function(err) {
+          var data = {
             type: "error",
+            callbackId: e.data.callbackId,
             message: err.message
-          });
+          };
+          self.postMessage(data);
         });
         break;
     }
@@ -85,7 +89,7 @@ function decoder() {
       sampleRate: reader.readUint32(),
       byteRate: reader.readUint32(),
       blockSize: reader.readUint16(),
-      bitsPerSample: reader.readUint16(),
+      bitDepth: reader.readUint16(),
     };
     reader.skip(chunkSize - 16);
 
@@ -159,72 +163,64 @@ function decoder() {
     return data;
   };
 
+  BufferReader.prototype.readPCM8 = function() {
+    var data = (this.view.getUint8(this.pos) - 128) / 128;
+    this.pos += 1;
+    return data;
+  };
+
+  BufferReader.prototype.readPCM16 = function() {
+    var data = this.view.getInt16(this.pos, true) / 32768;
+    this.pos += 2;
+    return data;
+  };
+
+  BufferReader.prototype.readPCM24 = function() {
+    var x0 = this.view.getUint8(this.pos + 0);
+    var x1 = this.view.getUint8(this.pos + 1);
+    var x2 = this.view.getUint8(this.pos + 2);
+    var xx = x0 + (x1 << 8) + (x2  << 16);
+    var data = ((xx & 0x800000) ? xx - 16777216 : xx) / 8388608;
+    this.pos += 3;
+    return data;
+  };
+
+  BufferReader.prototype.readPCM32 = function() {
+    var data = this.view.getInt32(this.pos, true) / 2147483648;
+    this.pos += 4;
+    return data;
+  };
+
+  BufferReader.prototype.readPCM32F = function() {
+    var data = this.view.getFloat32(this.pos, true);
+    this.pos += 4;
+    return data;
+  };
+
+  BufferReader.prototype.readPCM64F = function() {
+    var data = this.view.getFloat64(this.pos, true);
+    this.pos += 8;
+    return data;
+  };
+
   BufferReader.prototype.readPCM = function(channelData, length, format) {
     var numberOfChannels = format.numberOfChannels;
-    var uint8 = new Uint8Array(this.view.buffer, this.pos);
-    var viewLength = length * numberOfChannels;
-    var bytes = format.bitsPerSample >> 3;
-    var byteOffset = Math.ceil(uint8.byteOffset / bytes) * bytes;
-    var view, dx = 1;
+    var method = "readPCM" + format.bitDepth;
 
     if (format.floatingPoint) {
-      switch (format.bitsPerSample) {
-        case 32:
-          view = new Float32Array(uint8.buffer, byteOffset, viewLength);
-          break;
-        case 64:
-          view = new Float64Array(uint8.buffer, byteOffset, viewLength);
-          break;
-      }
-    } else {
-      switch (format.bitsPerSample) {
-        case 8:
-          view = new Int8Array(uint8.buffer, byteOffset, viewLength);
-          dx = 128;
-          break;
-        case 16:
-          view = new Int16Array(uint8.buffer, byteOffset, viewLength);
-          dx = 32768;
-          break;
-        case 24:
-          view = convert24to32(uint8, uint8.byteOffset, viewLength * 3);
-          dx = 8388608;
-          break;
-        case 32:
-          view = new Int32Array(uint8.buffer, byteOffset, viewLength);
-          dx = 2147483648;
-          break;
-      }
+      method += "F";
     }
 
-    if (!view) {
-      throw new Error("not suppoerted bit depth " + format.bitsPerSample);
+    if (!this[method]) {
+      throw new Error("not suppoerted bit depth " + format.bitDepth);
     }
 
     for (var i = 0; i < length; i++) {
       for (var ch = 0; ch < numberOfChannels; ch++) {
-        channelData[ch][i] = view[i * numberOfChannels + ch] / dx;
+        channelData[ch][i] = this[method]();
       }
     }
-
-    this.pos += length;
   };
-
-  function convert24to32(int8, byteOffset, viewLength) {
-    var uint8 = new Uint8Array(int8.buffer, byteOffset, viewLength);
-    var int32 = new Int32Array(uint8.length / 3);
-
-    for (var i = 0, imax = int32.length; i < imax; i++) {
-      var x0 = uint8[i * 3 + 0];
-      var x1 = uint8[i * 3 + 1];
-      var x2 = uint8[i * 3 + 2];
-      var xx = x0 + (x1 << 8) + (x2  << 16);
-
-      int32[i] = (xx & 0x800000) ? xx - 16777216 : xx;
-    }
-
-    return int32;
-  }
 }
 
 decoder.self = decoder.util = self;
