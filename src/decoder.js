@@ -4,6 +4,10 @@ import InlineWorker from "inline-worker";
 import decoder from "./decoder-worker";
 
 export default class Decoder {
+  static canProcess(format) {
+    return format === "wav";
+  }
+
   constructor() {
     this._worker = new InlineWorker(decoder, decoder.self);
     this._worker.onmessage = (e) => {
@@ -26,6 +30,10 @@ export default class Decoder {
       this._callbacks[e.data.callbackId] = null;
     };
     this._callbacks = [];
+  }
+
+  canProcess(format) {
+    return Decoder.canProcess(format);
   }
 
   decode(buffer) {

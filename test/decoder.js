@@ -23,6 +23,12 @@ let wavFile = new Uint8Array([
 ]).buffer;
 
 describe("Decoder", () => {
+  describe(".canProcess(format: string): boolean", () => {
+    it("works", () => {
+      assert(Decoder.canProcess("wav") === true);
+      assert(Decoder.canProcess("mp3") === false);
+    });
+  });
   describe("#decode(buffer: ArrayBuffer): Promise<AudioData>", () => {
     it("works", () => {
       let decoder = new Decoder();
@@ -36,6 +42,14 @@ describe("Decoder", () => {
         assert(closeTo(audioData.channelData[1][0], -1.0, 1e-4));
         assert(closeTo(audioData.channelData[1][1],  0.5, 1e-4));
       });
+    });
+  });
+  describe("#canProcess(format: string): boolean", () => {
+    it("works", () => {
+      let decoder = new Decoder();
+
+      assert(decoder.canProcess("wav") === true);
+      assert(decoder.canProcess("mp3") === false);
     });
   });
 });
