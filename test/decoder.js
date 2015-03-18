@@ -29,6 +29,19 @@ describe("Decoder", () => {
       assert(Decoder.canProcess("mp3") === false);
     });
   });
+  describe(".decode(buffer: ArrayBuffer): Promise<AudioData>", () => {
+    it("works", () => {
+      return Decoder.decode(wavFile).then((audioData) => {
+        assert(audioData.sampleRate === 44100);
+        assert(audioData.numberOfChannels === 2);
+        assert(audioData.length === 2);
+        assert(closeTo(audioData.channelData[0][0], -0.5, 1e-4));
+        assert(closeTo(audioData.channelData[0][1],  1.0, 1e-4));
+        assert(closeTo(audioData.channelData[1][0], -1.0, 1e-4));
+        assert(closeTo(audioData.channelData[1][1],  0.5, 1e-4));
+      });
+    });
+  });
   describe("#decode(buffer: ArrayBuffer): Promise<AudioData>", () => {
     it("works", () => {
       let decoder = new Decoder();

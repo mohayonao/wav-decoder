@@ -8,6 +8,10 @@ export default class Decoder {
     return format === "wav";
   }
 
+  static decode(buffer) {
+    return new Decoder().decode(buffer);
+  }
+
   constructor() {
     this._worker = new InlineWorker(decoder, decoder.self);
     this._worker.onmessage = (e) => {
