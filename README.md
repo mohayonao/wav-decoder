@@ -29,7 +29,12 @@ downloads:
 ### WavDecoder
 - `constructor()`
 
+#### Class methods
+- `canProcess(format: string): boolean`
+- `decode(buffer: ArrayBuffer): Promise<object>`
+
 #### Instance methods
+- `canProcess(format: string): boolean`
 - `decode(buffer: ArrayBuffer): Promise<object>`
 
 ## Usage
@@ -42,7 +47,7 @@ var WavDecoder = require("wav-decoder");
 
 var buffer = fs.readFileSync("foobar.wav");
 
-new WavDecoder().decode(buffer).then(function(audioData) {
+WavDecoder.decode(buffer).then(function(audioData) {
   console.log(audioData.numberOfChannels);
   console.log(audioData.length);
   console.log(audioData.sampleRate);
@@ -61,7 +66,7 @@ new WavDecoder().decode(buffer).then(function(audioData) {
 fetch("foobar.wav").then(function(res) {
   return res.arraybuffer();
 }).then(function(buffer) {
-  return new WavDecoder().decode(buffer);
+  return WavDecoder.decode(buffer);
 }).then(function(audioData) {
   console.log(audioData.numberOfChannels);
   console.log(audioData.length);
