@@ -10,7 +10,7 @@
     "inline-worker": "^0.1.0"
   },
   "devDependencies": {
-    "babel": "^4.7.12",
+    "babel": "^4.7.16",
     "browserify": "^9.0.3",
     "espower-babel": "^1.4.0",
     "isparta": "^2.2.0",
