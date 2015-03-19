@@ -4,8 +4,11 @@ import InlineWorker from "inline-worker";
 import decoder from "./decoder-worker";
 
 export default class Decoder {
-  static canProcess(format) {
-    return format === "wav";
+  static canProcess(src) {
+    if (src && (src instanceof ArrayBuffer || typeof src.length === "number")) {
+      return "maybe";
+    }
+    return "";
   }
 
   static decode(buffer) {

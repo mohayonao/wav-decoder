@@ -30,12 +30,12 @@ downloads:
 - `constructor()`
 
 #### Class methods
-- `canProcess(format: string): boolean`
-- `decode(buffer: ArrayBuffer): Promise<object>`
+- `canProcess(src: any): string`
+- `decode(src: ArrayBuffer|Buffer): Promise<object>`
 
 #### Instance methods
-- `canProcess(format: string): boolean`
-- `decode(buffer: ArrayBuffer): Promise<object>`
+- `canProcess(src: any): string`
+- `decode(src: ArrayBuffer|Buffer): Promise<object>`
 
 ## Usage
 

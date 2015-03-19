@@ -25,8 +25,8 @@ let wavFile = new Uint8Array([
 describe("Decoder", () => {
   describe(".canProcess(format: string): boolean", () => {
     it("works", () => {
-      assert(Decoder.canProcess("wav") === true);
-      assert(Decoder.canProcess("mp3") === false);
+      assert(Decoder.canProcess(new Uint8Array(100).buffer) === "maybe");
+      assert(Decoder.canProcess(null) === "");
     });
   });
   describe(".decode(buffer: ArrayBuffer): Promise<AudioData>", () => {
@@ -61,8 +61,8 @@ describe("Decoder", () => {
     it("works", () => {
       let decoder = new Decoder();
 
-      assert(decoder.canProcess("wav") === true);
-      assert(decoder.canProcess("mp3") === false);
+      assert(decoder.canProcess(new Uint8Array(100).buffer) === "maybe");
+      assert(decoder.canProcess(null) === "");
     });
   });
 });
