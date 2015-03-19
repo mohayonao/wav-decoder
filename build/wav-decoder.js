@@ -294,8 +294,11 @@ var Decoder = (function () {
     }
   }, {
     canProcess: {
-      value: function canProcess(format) {
-        return format === "wav";
+      value: function canProcess(src) {
+        if (src && (src instanceof ArrayBuffer || typeof src.length === "number")) {
+          return "maybe";
+        }
+        return "";
       }
     },
     decode: {
