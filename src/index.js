@@ -1,3 +1,3 @@
-import Decoder from "./decoder";
+import Decoder from "./Decoder";
 
 export default Decoder;
