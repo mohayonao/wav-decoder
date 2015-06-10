@@ -10,15 +10,15 @@
     "inline-worker": "^0.1.0"
   },
   "devDependencies": {
-    "babel": "^4.7.16",
-    "browserify": "^9.0.3",
-    "espower-babel": "^1.4.0",
-    "isparta": "^2.2.0",
-    "jshint": "^2.6.3",
-    "jshint-stylish": "^1.0.1",
-    "mocha": "^2.2.1",
-    "power-assert": "^0.10.2",
-    "uglify-js": "^2.4.17"
+    "babel": "^5.5.6",
+    "babel-eslint": "^3.1.15",
+    "browserify": "^10.2.4",
+    "eslint": "^0.22.1",
+    "espower-babel": "^3.2.0",
+    "isparta": "^3.0.3",
+    "mocha": "^2.2.5",
+    "power-assert": "^0.11.0",
+    "uglify-js": "^2.4.23"
   },
   "files": [
     "package.json",
@@ -42,12 +42,12 @@
   },
   "scripts": {
     "build": "npm run build-to5 && npm run build-browser && npm run build-minify",
-    "build-browser": "browserify ./lib/index.js --standalone WavDecoder --outfile build/wav-decoder.js",
+    "build-browser": "browserify lib/index.js --standalone WavDecoder --outfile build/wav-decoder.js",
     "build-minify": "uglifyjs build/wav-decoder.js -m -r self -o build/wav-decoder.min.js",
-    "build-to5": "babel src --out-dir lib",
-    "cover": "babel-node node_modules/.bin/isparta cover --report text --report html --report lcov node_modules/.bin/_mocha",
-    "lint": "jshint src test --reporter node_modules/jshint-stylish/stylish.js",
-    "test": "mocha --require espower-babel/guess",
+    "build-to5": "babel src --out-dir lib && cp src/decoder-worker.js lib/",
+    "cover": "babel-node $(npm bin)/isparta cover --report text --report html --report lcov _mocha",
+    "lint": "eslint src test",
+    "test": "mocha --compilers js:espower-babel/guess",
     "travis": "npm run lint && npm run test"
   }
 }
