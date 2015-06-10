@@ -1,13 +1,3 @@
-"use strict";
-/* jshint esnext: false */
-
-/**
-  CAUTION!!!!
-  This file is used in WebWorker.
-  So, must write with ES5, not use ES6.
-  You need attention not to be traspiled by babel.
-*/
-
 var self = {};
 
 function decoder() {
@@ -18,14 +8,14 @@ function decoder() {
           var data = {
             type: "decoded",
             callbackId: e.data.callbackId,
-            audioData: audioData
+            audioData: audioData,
           };
           self.postMessage(data, [ audioData.buffers ]);
         }, function(err) {
           var data = {
             type: "error",
             callbackId: e.data.callbackId,
-            message: err.message
+            message: err.message,
           };
           self.postMessage(data);
         });
@@ -114,7 +104,7 @@ function decoder() {
       numberOfChannels: format.numberOfChannels,
       length: length,
       sampleRate: format.sampleRate,
-      buffers: buffers
+      buffers: buffers,
     };
   };
 

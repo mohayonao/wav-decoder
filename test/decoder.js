@@ -1,5 +1,3 @@
-"use strict";
-
 import assert from "power-assert";
 import AudioData from "audiodata";
 import Decoder from "../src/decoder";
@@ -22,15 +20,15 @@ let wavFile = new Uint8Array([
   0xff, 0x7f, 0x00, 0x40,
 ]).buffer;
 
-describe("Decoder", () => {
-  describe(".canProcess(format: string): boolean", () => {
-    it("works", () => {
+describe("Decoder", function() {
+  describe(".canProcess(format: string): boolean", function() {
+    it("works", function() {
       assert(Decoder.canProcess(new Uint8Array(100).buffer) === "maybe");
       assert(Decoder.canProcess(null) === "");
     });
   });
-  describe(".decode(buffer: ArrayBuffer): Promise<AudioData>", () => {
-    it("works", () => {
+  describe(".decode(buffer: ArrayBuffer): Promise<AudioData>", function() {
+    it("works", function() {
       return Decoder.decode(wavFile).then((audioData) => {
         assert(audioData.sampleRate === 44100);
         assert(audioData.numberOfChannels === 2);
@@ -42,8 +40,8 @@ describe("Decoder", () => {
       });
     });
   });
-  describe("#decode(buffer: ArrayBuffer): Promise<AudioData>", () => {
-    it("works", () => {
+  describe("#decode(buffer: ArrayBuffer): Promise<AudioData>", function() {
+    it("works", function() {
       let decoder = new Decoder();
 
       return decoder.decode(wavFile).then((audioData) => {
@@ -57,8 +55,8 @@ describe("Decoder", () => {
       });
     });
   });
-  describe("#canProcess(format: string): boolean", () => {
-    it("works", () => {
+  describe("#canProcess(format: string): boolean", function() {
+    it("works", function() {
       let decoder = new Decoder();
 
       assert(decoder.canProcess(new Uint8Array(100).buffer) === "maybe");
@@ -66,9 +64,9 @@ describe("Decoder", () => {
     });
   });
 });
-describe("AudioData", () => {
-  describe(".decode(buffer: ArrayBuffer): Promise<AudioData>", () => {
-    it("works", () => {
+describe("AudioData", function() {
+  describe(".decode(buffer: ArrayBuffer): Promise<AudioData>", function() {
+    it("works", function() {
       AudioData.install(Decoder);
 
       return AudioData.decode(wavFile).then((audioData) => {

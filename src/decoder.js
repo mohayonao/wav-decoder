@@ -1,5 +1,3 @@
-"use strict";
-
 import InlineWorker from "inline-worker";
 import decoder from "./decoder-worker";
 
@@ -54,7 +52,7 @@ export default class Decoder {
       }
 
       this._worker.postMessage({
-        type: "decode", buffer, callbackId
+        type: "decode", buffer, callbackId,
       }, [ buffer ]);
     });
   }
