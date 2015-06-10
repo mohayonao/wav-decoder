@@ -1,5 +1,4 @@
 import assert from "power-assert";
-import AudioData from "audiodata";
 import Decoder from "../src/decoder";
 
 let closeTo = (actual, expected, delta) => Math.abs(actual - expected) <= delta;
@@ -21,12 +20,6 @@ let wavFile = new Uint8Array([
 ]).buffer;
 
 describe("Decoder", function() {
-  describe(".canProcess(format: string): boolean", function() {
-    it("works", function() {
-      assert(Decoder.canProcess(new Uint8Array(100).buffer) === "maybe");
-      assert(Decoder.canProcess(null) === "");
-    });
-  });
   describe(".decode(buffer: ArrayBuffer): Promise<AudioData>", function() {
     it("works", function() {
       return Decoder.decode(wavFile).then((audioData) => {
@@ -45,32 +38,6 @@ describe("Decoder", function() {
       let decoder = new Decoder();
 
       return decoder.decode(wavFile).then((audioData) => {
-        assert(audioData.sampleRate === 44100);
-        assert(audioData.numberOfChannels === 2);
-        assert(audioData.length === 2);
-        assert(closeTo(audioData.channelData[0][0], -0.5, 1e-4));
-        assert(closeTo(audioData.channelData[0][1],  1.0, 1e-4));
-        assert(closeTo(audioData.channelData[1][0], -1.0, 1e-4));
-        assert(closeTo(audioData.channelData[1][1],  0.5, 1e-4));
-      });
-    });
-  });
-  describe("#canProcess(format: string): boolean", function() {
-    it("works", function() {
-      let decoder = new Decoder();
-
-      assert(decoder.canProcess(new Uint8Array(100).buffer) === "maybe");
-      assert(decoder.canProcess(null) === "");
-    });
-  });
-});
-describe("AudioData", function() {
-  describe(".decode(buffer: ArrayBuffer): Promise<AudioData>", function() {
-    it("works", function() {
-      AudioData.install(Decoder);
-
-      return AudioData.decode(wavFile).then((audioData) => {
-        assert(audioData instanceof AudioData);
         assert(audioData.sampleRate === 44100);
         assert(audioData.numberOfChannels === 2);
         assert(audioData.length === 2);

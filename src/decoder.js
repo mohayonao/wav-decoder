@@ -2,13 +2,6 @@ import InlineWorker from "inline-worker";
 import decoder from "./decoder-worker";
 
 export default class Decoder {
-  static canProcess(src) {
-    if (src && (src instanceof ArrayBuffer || typeof src.length === "number")) {
-      return "maybe";
-    }
-    return "";
-  }
-
   static decode(buffer) {
     return new Decoder().decode(buffer);
   }
@@ -35,10 +28,6 @@ export default class Decoder {
       this._callbacks[e.data.callbackId] = null;
     };
     this._callbacks = [];
-  }
-
-  canProcess(format) {
-    return Decoder.canProcess(format);
   }
 
   decode(buffer) {
