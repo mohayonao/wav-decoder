@@ -30,12 +30,21 @@ downloads:
 - `constructor()`
 
 #### Class methods
-- `canProcess(src: any): string`
-- `decode(src: ArrayBuffer|Buffer): Promise<object>`
+- `decode(src: ArrayBuffer|Buffer): Promise<AudioData>`
 
 #### Instance methods
-- `canProcess(src: any): string`
-- `decode(src: ArrayBuffer|Buffer): Promise<object>`
+- `decode(src: ArrayBuffer|Buffer): Promise<AudioData>`
+
+##### Returns
+
+[`AudioData`](https://github.com/mohayonao/audiodata) is defined below.
+
+```js
+interface AudioData {
+  sampleRate: number;
+  channelData: Float32Array[];
+}
+```
 
 ## Usage
 
@@ -45,11 +54,20 @@ downloads:
 var fs = require("fs");
 var WavDecoder = require("wav-decoder");
 
-var buffer = fs.readFileSync("foobar.wav");
+var readFile = function(filepath) {
+  return new Promise(function(resolve, reject) {
+    fs.readFile(filepath, function(err, buffer) {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(buffer);
+    });
+  });
+};
 
-WavDecoder.decode(buffer).then(function(audioData) {
-  console.log(audioData.numberOfChannels);
-  console.log(audioData.length);
+readFile("foobar.wav").then(function(buffer) {
+  return WavDecoder.decode(buffer); // buffer is an instance of Buffer
+}).then(function(audioData) {
   console.log(audioData.sampleRate);
   console.log(audioData.channelData[0]); // Float32Array
   console.log(audioData.channelData[1]); // Float32Array
@@ -66,10 +84,8 @@ WavDecoder.decode(buffer).then(function(audioData) {
 fetch("foobar.wav").then(function(res) {
   return res.arraybuffer();
 }).then(function(buffer) {
-  return WavDecoder.decode(buffer);
+  return WavDecoder.decode(buffer); // buffer is an instance of ArrayBuffer
 }).then(function(audioData) {
-  console.log(audioData.numberOfChannels);
-  console.log(audioData.length);
   console.log(audioData.sampleRate);
   console.log(audioData.channelData[0]); // Float32Array
   console.log(audioData.channelData[1]); // Float32Array
