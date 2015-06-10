@@ -1,7 +1,7 @@
 {
   "name": "wav-decoder",
   "description": "isomorphic wav data decoder",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "authors": [
     "Nao Yonamine <mohayonao@gmail.com>"
   ],
@@ -14,6 +14,7 @@
     "src"
   ],
   "keywords": [
+    "audiodata",
     "decode",
     "isomorphic",
     "wav"
