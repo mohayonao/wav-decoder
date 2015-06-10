@@ -1,25 +1,11 @@
+var DataView2 = require("dataview2").DataView2;
+
 var self = {};
 
 function decoder() {
   self.onmessage = function(e) {
-    switch (e.data.type) {
-      case "decode":
-        self.decode(e.data.buffer).then(function(audioData) {
-          var data = {
-            type: "decoded",
-            callbackId: e.data.callbackId,
-            audioData: audioData,
-          };
-          self.postMessage(data, [ audioData.buffers ]);
-        }, function(err) {
-          var data = {
-            type: "error",
-            callbackId: e.data.callbackId,
-            message: err.message,
-          };
-          self.postMessage(data);
-        });
-        break;
+    if (e.data.type === "decode") {
+      self.decode(e.data.callbackId, e.data.buffer);
     }
   };
 
@@ -28,7 +14,27 @@ function decoder() {
     0x0003: "lpcm",
   };
 
-  self.decode = function(buffer) {
+  self.decode = function(callbackId, buffer) {
+    function successCallback(audioData) {
+      self.postMessage({
+        type: "decoded",
+        callbackId: callbackId,
+        audioData: audioData,
+      }, [ audioData.buffers ]);
+    }
+
+    function errorCallback(err) {
+      self.postMessage({
+        type: "error",
+        callbackId: callbackId,
+        message: err.message,
+      });
+    }
+
+    self.decodeWav(buffer).then(successCallback, errorCallback);
+  };
+
+  self.decodeWav = function(buffer) {
     return new Promise(function(resolve) {
       var reader = new BufferReader(buffer);
 
@@ -109,9 +115,12 @@ function decoder() {
   };
 
   function BufferReader(buffer) {
-    this.buffer = buffer;
-    this.view = new DataView(buffer);
-    this.length = buffer.byteLength;
+    if (buffer instanceof ArrayBuffer) {
+      this.view = new DataView(buffer);
+    } else {
+      this.view = new DataView2(buffer);
+    }
+    this.length = this.view.byteLength;
     this.pos = 0;
   }
 

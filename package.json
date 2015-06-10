@@ -7,6 +7,7 @@
     "url": "https://github.com/mohayonao/wav-decoder/issues"
   },
   "dependencies": {
+    "dataview2": "^0.1.0",
     "inline-worker": "^0.1.0"
   },
   "devDependencies": {
