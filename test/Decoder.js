@@ -1,5 +1,5 @@
 import assert from "power-assert";
-import Decoder from "../src/decoder";
+import Decoder from "../src/Decoder";
 
 let closeTo = (actual, expected, delta) => Math.abs(actual - expected) <= delta;
 

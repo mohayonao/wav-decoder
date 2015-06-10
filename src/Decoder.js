@@ -1,5 +1,5 @@
 import InlineWorker from "inline-worker";
-import decoder from "./decoder-worker";
+import DecoderWorker from "./DecoderWorker";
 
 export default class Decoder {
   static decode(buffer) {
@@ -7,7 +7,7 @@ export default class Decoder {
   }
 
   constructor() {
-    this._worker = new InlineWorker(decoder, decoder.self);
+    this._worker = new InlineWorker(DecoderWorker, DecoderWorker.self);
     this._worker.onmessage = (e) => {
       let callback = this._callbacks[e.data.callbackId];
 
