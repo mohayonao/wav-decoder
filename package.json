@@ -16,6 +16,7 @@
   "files": [
     "package.json",
     "README.md",
+    "index.js",
     "lib"
   ],
   "homepage": "https://github.com/mohayonao/wav-decoder/",
