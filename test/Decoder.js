@@ -1,5 +1,7 @@
-import assert from "power-assert";
-import Decoder from "../src/Decoder";
+"use strict";
+
+const assert = require("assert");
+const Decoder = require("../lib/Decoder");
 
 let closeTo = (actual, expected, delta) => Math.abs(actual - expected) <= delta;
 
