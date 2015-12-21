@@ -1,29 +1,15 @@
 # wav-decoder
 [![Build Status](http://img.shields.io/travis/mohayonao/wav-decoder.svg?style=flat-square)](https://travis-ci.org/mohayonao/wav-decoder)
 [![NPM Version](http://img.shields.io/npm/v/wav-decoder.svg?style=flat-square)](https://www.npmjs.org/package/wav-decoder)
-[![Bower](http://img.shields.io/bower/v/wav-decoder.svg?style=flat-square)](http://bower.io/search/?q=wav-decoder)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](http://mohayonao.mit-license.org/)
 
-> isomorphic wav data decoder
+> universal wav data decoder
 
 ## Installation
 
-npm:
-
 ```
-npm install wav-decoder
+$ npm install wav-decoder
 ```
-
-bower:
-
-```
-bower install wav-decoder
-```
-
-downloads:
-
-- [wav-decoder.js](https://raw.githubusercontent.com/mohayonao/wav-decoder/master/build/wav-decoder.js)
-- [wav-decoder.min.js](https://raw.githubusercontent.com/mohayonao/wav-decoder/master/build/wav-decoder.min.js)
 
 ## API
 ### WavDecoder
@@ -36,8 +22,6 @@ downloads:
 - `decode(src: ArrayBuffer|Buffer): Promise<AudioData>`
 
 ##### Returns
-
-[`AudioData`](https://github.com/mohayonao/audiodata) is defined below.
 
 ```js
 interface AudioData {
