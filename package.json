@@ -7,8 +7,8 @@
     "url": "https://github.com/mohayonao/wav-decoder/issues"
   },
   "dependencies": {
-    "dataview2": "^0.1.0",
-    "inline-worker": "^0.1.0"
+    "dataview2": "^1.0.0",
+    "inline-worker": "^1.0.0"
   },
   "devDependencies": {
     "mocha": "^2.3.4"
@@ -20,16 +20,12 @@
   ],
   "homepage": "https://github.com/mohayonao/wav-decoder/",
   "keywords": [
-    "audiodata",
     "decode",
-    "isomorphic",
+    "universal",
     "wav"
   ],
   "licenses": "MIT",
-  "main": "./lib/index.js",
-  "peerDependencies": {
-    "audiodata": "*"
-  },
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/mohayonao/wav-decoder.git"
