@@ -1,23 +1,20 @@
 {
   "name": "wav-decoder",
-  "description": "universal wav data decoder",
+  "description": "promise-based wav decoder",
   "version": "1.0.0",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "bugs": {
     "url": "https://github.com/mohayonao/wav-decoder/issues"
   },
-  "dependencies": {
-    "dataview2": "^1.0.0",
-    "inline-worker": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "mocha": "^2.3.4"
+    "ava": "^0.13.0",
+    "eslint": "^2.7.0"
   },
   "files": [
     "package.json",
     "README.md",
-    "index.js",
-    "lib"
+    "index.js"
   ],
   "homepage": "https://github.com/mohayonao/wav-decoder/",
   "keywords": [
@@ -25,14 +22,18 @@
     "universal",
     "wav"
   ],
-  "licenses": "MIT",
+  "license": "MIT",
   "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/mohayonao/wav-decoder.git"
   },
   "scripts": {
-    "test": "mocha",
-    "travis": "npm run test"
+    "lint": "eslint index.js",
+    "postversion": "git push && git push --tags",
+    "prepublish": "npm run lint && npm run test",
+    "preversion": "npm run lint && npm run test",
+    "test": "ava test",
+    "travis": "npm run lint && npm run test"
   }
 }

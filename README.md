@@ -3,7 +3,7 @@
 [![NPM Version](http://img.shields.io/npm/v/wav-decoder.svg?style=flat-square)](https://www.npmjs.org/package/wav-decoder)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](http://mohayonao.mit-license.org/)
 
-> universal wav data decoder
+> promise-based wav decoder
 
 ## Installation
 
@@ -12,14 +12,9 @@ $ npm install wav-decoder
 ```
 
 ## API
-### WavDecoder
-- `constructor()`
 
-#### Class methods
-- `decode(src: ArrayBuffer|Buffer): Promise<AudioData>`
-
-#### Instance methods
-- `decode(src: ArrayBuffer|Buffer): Promise<AudioData>`
+- `decode(src: ArrayBuffer): Promise<AudioData>`
+  - if provide an instance of `Buffer`, it is converted to `ArrayBuffer` like `Uint8Array.from(src).buffer` implicitly.
 
 ##### Returns
 
@@ -32,15 +27,13 @@ interface AudioData {
 
 ## Usage
 
-#### node.js
-
 ```js
-var fs = require("fs");
-var WavDecoder = require("wav-decoder");
+const fs = require("fs");
+const WavDecoder = require("wav-decoder");
 
-var readFile = function(filepath) {
-  return new Promise(function(resolve, reject) {
-    fs.readFile(filepath, function(err, buffer) {
+const readFile = (filepath) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filepath, (err, buffer) => {
       if (err) {
         return reject(err);
       }
@@ -49,26 +42,8 @@ var readFile = function(filepath) {
   });
 };
 
-readFile("foobar.wav").then(function(buffer) {
-  return WavDecoder.decode(buffer); // buffer is an instance of Buffer
-}).then(function(audioData) {
-  console.log(audioData.sampleRate);
-  console.log(audioData.channelData[0]); // Float32Array
-  console.log(audioData.channelData[1]); // Float32Array
-});
-```
-
-#### browser
-
-```html
-<script src="/path/to/wav-decoder.js"></script>
-```
-
-```js
-fetch("foobar.wav").then(function(res) {
-  return res.arraybuffer();
-}).then(function(buffer) {
-  return WavDecoder.decode(buffer); // buffer is an instance of ArrayBuffer
+readFile("foobar.wav").then((buffer) => {
+  return WavDecoder.decode(buffer);
 }).then(function(audioData) {
   console.log(audioData.sampleRate);
   console.log(audioData.channelData[0]); // Float32Array

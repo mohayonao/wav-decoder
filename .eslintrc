@@ -1,0 +1,12 @@
+{
+  "env": {
+    "node": true
+  },
+  "globals": {
+    "Promise": true,
+    "DataView": true,
+    "Uint8Array": true,
+    "Float32Array": true
+  },
+  "extends": "eslint:recommended"
+}
