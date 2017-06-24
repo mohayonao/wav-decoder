@@ -76,6 +76,8 @@ function decodeFormat(reader, chunkSize) {
 }
 
 function decodeData(reader, chunkSize, format) {
+  chunkSize = Math.min(chunkSize, reader.remain());
+
   var length = Math.floor(chunkSize / format.blockSize);
   var numberOfChannels = format.numberOfChannels;
   var sampleRate = format.sampleRate;
@@ -124,6 +126,9 @@ function createReader(dataView) {
   var pos = 0;
 
   return {
+    remain: function() {
+      return dataView.byteLength - pos;
+    },
     skip: function(n) {
       pos += n;
     },
