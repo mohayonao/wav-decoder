@@ -1,5 +1,6 @@
-const test = require("ava");
-const { readFile, readAudioData, deepEqual, deepCloseTo } = require("./_util");
+const fs = require("fs");
+const path = require("path");
+const assert = require("assert");
 const decoder = require("..");
 
 const testSpec = [
@@ -10,17 +11,55 @@ const testSpec = [
   { opts: { float:  true }, delta: 0.00, filename: "amen_pcm32f.wav" }
 ];
 
-test("decoding", async t => {
-  const expected = await readAudioData("./fixtures/amen.dat");
+function readFile(filename) {
+  return fs.readFileSync(path.join(__dirname, "fixtures", filename));
+}
 
-  return Promise.all(testSpec.map(async spec => {
-    const wavData = await readFile(`./fixtures/${ spec.filename }`);
-    const actual = await decoder.decode(wavData);
+function readAudioData(filename) {
+  const buffer = readFile(filename).buffer;
 
-    t.ok(actual.numberOfChannels === expected.numberOfChannels);
-    t.ok(actual.length === expected.length);
-    t.ok(actual.sampleRate === expected.sampleRate);
-    t.ok(deepCloseTo(actual.channelData[0], expected.channelData[0], spec.delta));
-    t.ok(deepCloseTo(actual.channelData[1], expected.channelData[1], spec.delta));
-  }));
+  const uint32 = new Uint32Array(buffer, 4);
+  const float32 = new Float32Array(buffer, 16);
+
+  const numberOfChannels = uint32[0];
+  const length = uint32[1];
+  const sampleRate = uint32[2];
+  const channelData = new Array(numberOfChannels).fill().map((_, ch) => {
+    return float32.subarray(ch * length, (ch + 1) * length);
+  });
+
+  return {
+    numberOfChannels: numberOfChannels,
+    length: length,
+    sampleRate: sampleRate,
+    channelData: channelData
+  };
+}
+
+function deepCloseTo(a, b, delta) {
+  assert(a.length === b.length);
+
+  for (let i = 0, imax = a.length; i < imax; i++) {
+    assert(Math.abs(a[i] - b[i]) <= delta, `a[${i}]=${a[i]}, b[${i}]=${b[i]}`);
+  }
+
+  return true;
+}
+
+describe("decode(audioData, opts)", () => {
+  const expected = readAudioData("amen.dat");
+
+  testSpec.forEach(({ opts, delta, filename }) => {
+    it(filename, () => {
+      const wavData = readFile(filename);
+
+      return decoder.decode(wavData).then((actual) => {
+        assert(actual.numberOfChannels === expected.numberOfChannels);
+        assert(actual.length === expected.length);
+        assert(actual.sampleRate === expected.sampleRate);
+        assert(deepCloseTo(actual.channelData[0], expected.channelData[0], delta));
+        assert(deepCloseTo(actual.channelData[1], expected.channelData[1], delta));
+      });
+    });
+  });
 });
