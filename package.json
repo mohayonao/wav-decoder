@@ -1,7 +1,7 @@
 {
   "name": "wav-decoder",
   "description": "promise-based wav decoder",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "author": "Nao Yonamine <mohayonao@gmail.com>",
   "bugs": {
     "url": "https://github.com/mohayonao/wav-decoder/issues"
