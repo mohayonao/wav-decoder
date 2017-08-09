@@ -1,7 +1,7 @@
 # wav-decoder
-[![Build Status](http://img.shields.io/travis/mohayonao/wav-decoder.svg?style=flat-square)](https://travis-ci.org/mohayonao/wav-decoder)
-[![NPM Version](http://img.shields.io/npm/v/wav-decoder.svg?style=flat-square)](https://www.npmjs.org/package/wav-decoder)
-[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](http://mohayonao.mit-license.org/)
+[![Build Status](https://img.shields.io/travis/mohayonao/wav-decoder.svg?style=flat-square)](https://travis-ci.org/mohayonao/wav-decoder)
+[![NPM Version](https://img.shields.io/npm/v/wav-decoder.svg?style=flat-square)](https://www.npmjs.org/package/wav-decoder)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://mohayonao.mit-license.org/)
 
 > promise-based wav decoder
 
@@ -15,6 +15,8 @@ $ npm install wav-decoder
 
 - `decode(src: ArrayBuffer): Promise<AudioData>`
   - if provide an instance of `Buffer`, it is converted to `ArrayBuffer` like `Uint8Array.from(src).buffer` implicitly.
+- `decode.sync(src: ArrayBuffer): AudioData`
+  - synchronous version
 
 ##### Returns
 

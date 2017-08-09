@@ -46,20 +46,19 @@ function deepCloseTo(a, b, delta) {
   return true;
 }
 
-describe("decode(audioData, opts)", () => {
+describe("decode.sync(audioData, opts)", () => {
   const expected = readAudioData("amen.dat");
 
   testSpec.forEach(({ opts, delta, filename }) => {
     it(filename, () => {
       const wavData = readFile(filename);
+      const actual = decoder.decode.sync(wavData);
 
-      return decoder.decode(wavData).then((actual) => {
-        assert(actual.numberOfChannels === expected.numberOfChannels);
-        assert(actual.length === expected.length);
-        assert(actual.sampleRate === expected.sampleRate);
-        assert(deepCloseTo(actual.channelData[0], expected.channelData[0], delta));
-        assert(deepCloseTo(actual.channelData[1], expected.channelData[1], delta));
-      });
+      assert(actual.numberOfChannels === expected.numberOfChannels);
+      assert(actual.length === expected.length);
+      assert(actual.sampleRate === expected.sampleRate);
+      assert(deepCloseTo(actual.channelData[0], expected.channelData[0], delta));
+      assert(deepCloseTo(actual.channelData[1], expected.channelData[1], delta));
     });
   });
 });
