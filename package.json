@@ -8,8 +8,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "ava": "^0.13.0",
-    "eslint": "^2.7.0"
+    "eslint": "^4.4.1",
+    "mocha": "^3.5.0"
   },
   "files": [
     "package.json",
@@ -33,7 +33,7 @@
     "postversion": "git push && git push --tags",
     "prepublish": "npm run lint && npm run test",
     "preversion": "npm run lint && npm run test",
-    "test": "ava test",
+    "test": "mocha",
     "travis": "npm run lint && npm run test"
   }
 }
