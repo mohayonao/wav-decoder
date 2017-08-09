@@ -5,52 +5,56 @@ var formats = {
   0x0003: "lpcm"
 };
 
-function decode(buffer) {
+function decodeSync(buffer) {
   if (global.Buffer && buffer instanceof global.Buffer) {
     buffer = Uint8Array.from(buffer).buffer;
   }
 
-  return new Promise(function(resolve, reject) {
-    var dataView = new DataView(buffer);
-    var reader = createReader(dataView);
+  var dataView = new DataView(buffer);
+  var reader = createReader(dataView);
 
-    if (reader.string(4) !== "RIFF") {
-      return reject(new TypeError("Invalid WAV file"));
-    }
+  if (reader.string(4) !== "RIFF") {
+    throw new TypeError("Invalid WAV file");
+  }
 
-    reader.uint32(); // skip file length
+  reader.uint32(); // skip file length
 
-    if (reader.string(4) !== "WAVE") {
-      return reject(new TypeError("Invalid WAV file"));
-    }
+  if (reader.string(4) !== "WAVE") {
+    throw new TypeError("Invalid WAV file");
+  }
 
-    var format = null;
-    var audioData = null;
+  var format = null;
+  var audioData = null;
 
-    do {
-      var chunkType = reader.string(4);
-      var chunkSize = reader.uint32();
+  do {
+    var chunkType = reader.string(4);
+    var chunkSize = reader.uint32();
 
-      switch (chunkType) {
-      case "fmt ":
-        format = decodeFormat(reader, chunkSize);
-        if (format instanceof Error) {
-          return reject(format);
-        }
-        break;
-      case "data":
-        audioData = decodeData(reader, chunkSize, format);
-        if (audioData instanceof Error) {
-          return reject(format);
-        }
-        break;
-      default:
-        reader.skip(chunkSize);
-        break;
+    switch (chunkType) {
+    case "fmt ":
+      format = decodeFormat(reader, chunkSize);
+      if (format instanceof Error) {
+        throw format;
       }
-    } while (audioData === null);
+      break;
+    case "data":
+      audioData = decodeData(reader, chunkSize, format);
+      if (audioData instanceof Error) {
+        throw audioData;
+      }
+      break;
+    default:
+      reader.skip(chunkSize);
+      break;
+    }
+  } while (audioData === null);
 
-    resolve(audioData);
+  return audioData;
+}
+
+function decode(buffer) {
+  return new Promise(function(resolve) {
+    resolve(decodeSync(buffer));
   });
 }
 
@@ -219,3 +223,4 @@ function createReader(dataView) {
 }
 
 module.exports.decode = decode;
+module.exports.decode.sync = decodeSync;
