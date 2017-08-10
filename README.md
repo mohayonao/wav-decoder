@@ -13,9 +13,10 @@ $ npm install wav-decoder
 
 ## API
 
-- `decode(src: ArrayBuffer): Promise<AudioData>`
+- `decode(src: ArrayBuffer, [opts: object]): Promise<AudioData>`
   - if provide an instance of `Buffer`, it is converted to `ArrayBuffer` like `Uint8Array.from(src).buffer` implicitly.
-- `decode.sync(src: ArrayBuffer): AudioData`
+  - `opts.symmetric` decode to symmetrical values (see [#14](https://github.com/mohayonao/wav-decoder/issues/14))
+- `decode.sync(src: ArrayBuffer, [opts: object]): AudioData`
   - synchronous version
 
 ##### Returns

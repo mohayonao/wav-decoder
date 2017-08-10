@@ -9,7 +9,8 @@
   "dependencies": {},
   "devDependencies": {
     "eslint": "^4.4.1",
-    "mocha": "^3.5.0"
+    "mocha": "^3.5.0",
+    "wav-encoder": "^1.2.0"
   },
   "files": [
     "package.json",

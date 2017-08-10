@@ -5,7 +5,9 @@ var formats = {
   0x0003: "lpcm"
 };
 
-function decodeSync(buffer) {
+function decodeSync(buffer, opts) {
+  opts = opts || {};
+
   if (global.Buffer && buffer instanceof global.Buffer) {
     buffer = Uint8Array.from(buffer).buffer;
   }
@@ -38,7 +40,7 @@ function decodeSync(buffer) {
       }
       break;
     case "data":
-      audioData = decodeData(reader, chunkSize, format);
+      audioData = decodeData(reader, chunkSize, format, opts);
       if (audioData instanceof Error) {
         throw audioData;
       }
@@ -52,9 +54,9 @@ function decodeSync(buffer) {
   return audioData;
 }
 
-function decode(buffer) {
+function decode(buffer, opts) {
   return new Promise(function(resolve) {
-    resolve(decodeSync(buffer));
+    resolve(decodeSync(buffer, opts));
   });
 }
 
@@ -79,7 +81,7 @@ function decodeFormat(reader, chunkSize) {
   return format;
 }
 
-function decodeData(reader, chunkSize, format) {
+function decodeData(reader, chunkSize, format, opts) {
   chunkSize = Math.min(chunkSize, reader.remain());
 
   var length = Math.floor(chunkSize / format.blockSize);
@@ -91,7 +93,7 @@ function decodeData(reader, chunkSize, format) {
     channelData[ch] = new Float32Array(length);
   }
 
-  var retVal = readPCM(reader, channelData, length, format);
+  var retVal = readPCM(reader, channelData, length, format, opts);
 
   if (retVal instanceof Error) {
     return retVal;
@@ -105,10 +107,10 @@ function decodeData(reader, chunkSize, format) {
   };
 }
 
-function readPCM(reader, channelData, length, format) {
+function readPCM(reader, channelData, length, format, opts) {
   var bitDepth = format.bitDepth;
-  var floatingPoint = format.floatingPoint ? "f" : "";
-  var methodName = "pcm" + bitDepth + floatingPoint;
+  var decoderOption = format.floatingPoint ? "f" : opts.symmetric ? "s" : "";
+  var methodName = "pcm" + bitDepth + decoderOption;
 
   if (!reader[methodName]) {
     return new TypeError("Not supported bit depth: " + format.bitDepth);
@@ -180,12 +182,26 @@ function createReader(dataView) {
 
       return data < 0 ? data / 128 : data / 127;
     },
+    pcm8s: function() {
+      var data = dataView.getUint8(pos) - 127.5;
+
+      pos += 1;
+
+      return data / 127.5;
+    },
     pcm16: function() {
       var data = dataView.getInt16(pos, true);
 
       pos += 2;
 
       return data < 0 ? data / 32768 : data / 32767;
+    },
+    pcm16s: function() {
+      var data = dataView.getInt16(pos, true);
+
+      pos += 2;
+
+      return data / 32768;
     },
     pcm24: function() {
       var x0 = dataView.getUint8(pos + 0);
@@ -198,12 +214,30 @@ function createReader(dataView) {
 
       return data < 0 ? data / 8388608 : data / 8388607;
     },
+    pcm24s: function() {
+      var x0 = dataView.getUint8(pos + 0);
+      var x1 = dataView.getUint8(pos + 1);
+      var x2 = dataView.getUint8(pos + 2);
+      var xx = (x0 + (x1 << 8) + (x2 << 16));
+      var data = xx > 0x800000 ? xx - 0x1000000 : xx;
+
+      pos += 3;
+
+      return data / 8388608;
+    },
     pcm32: function() {
       var data = dataView.getInt32(pos, true);
 
       pos += 4;
 
       return data < 0 ? data / 2147483648 : data / 2147483647;
+    },
+    pcm32s: function() {
+      var data = dataView.getInt32(pos, true);
+
+      pos += 4;
+
+      return data / 2147483648;
     },
     pcm32f: function() {
       var data = dataView.getFloat32(pos, true);
